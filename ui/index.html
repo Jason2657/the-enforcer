@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Enforcer</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#121831; --panel2:#0e1530; --line:#243154;
+    --ink:#e8edf7; --mut:#8da0c4; --acc:#6ea8fe;
+    --crit:#ef4444; --warn:#f59e0b; --adv:#94a3b8; --ok:#22c55e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16204a 0,var(--bg) 55%);
+       color:var(--ink);font:14px/1.5 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:18px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px}
+  header h1{font-size:20px;margin:0;letter-spacing:.3px}
+  header h1 b{color:var(--acc)}
+  .tag{color:var(--mut);font-size:13px}
+  .badge{margin-left:auto;font-size:12px;color:var(--ok);border:1px solid #1d5b3a;
+         background:#0c2a1c;padding:5px 10px;border-radius:999px}
+  main{display:grid;grid-template-columns:300px 320px 1fr;gap:16px;padding:16px 22px;align-items:start}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+        border-radius:14px;padding:16px}
+  .card h2{margin:0 0 10px;font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--mut)}
+  .kv{margin:9px 0}
+  .kv .k{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut)}
+  .kv .v{margin-top:2px}
+  .pill{display:inline-block;background:#0c1430;border:1px solid var(--line);border-radius:7px;
+        padding:2px 8px;margin:2px 4px 2px 0;font-size:12px;color:#cdd9f5}
+  pre.sig{white-space:pre-wrap;background:#0c1430;border:1px solid var(--line);border-radius:8px;
+          padding:8px 10px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;color:#cdd9f5;margin:4px 0 0}
+  .fx{display:flex;flex-direction:column;gap:8px}
+  .fx button{text-align:left;background:#0c1430;border:1px solid var(--line);color:var(--ink);
+             padding:10px 12px;border-radius:10px;cursor:pointer;transition:.12s}
+  .fx button:hover{border-color:var(--acc);transform:translateY(-1px)}
+  .fx button small{display:block;color:var(--mut);font-size:11.5px;margin-top:2px}
+  .sep{height:1px;background:var(--line);margin:14px 0}
+  label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut)}
+  input[type=text],textarea{width:100%;background:#0c1430;border:1px solid var(--line);color:var(--ink);
+       border-radius:9px;padding:9px;margin-top:4px;font:13px ui-sans-serif}
+  textarea{min-height:84px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
+  .run{width:100%;margin-top:10px;background:linear-gradient(180deg,#3b82f6,#2563eb);border:0;color:#fff;
+       font-weight:600;padding:11px;border-radius:10px;cursor:pointer;font-size:14px}
+  .run:disabled{opacity:.55;cursor:default}
+  /* report */
+  #status{color:var(--mut);min-height:20px}
+  .summary{font-size:16px;margin:2px 0 12px}
+  .greenwrap{display:flex;align-items:center;gap:12px;background:#0c2a1c;border:1px solid #1d5b3a;
+             border-radius:12px;padding:16px}
+  .greenwrap .dot{width:38px;height:38px;border-radius:50%;background:var(--ok);display:grid;place-items:center;
+             color:#04210f;font-size:22px;font-weight:800}
+  .injbar{display:none;align-items:center;gap:12px;background:#2a0c0c;border:1px solid #5b1d1d;
+          border-radius:12px;padding:13px 15px;margin-bottom:12px}
+  .injbar.on{display:flex}
+  .injbar .shield{font-size:24px}
+  .injbar b{color:#ff8a8a}
+  .injbar small{color:#e7a3a3;display:block}
+  .flag{border:1px solid var(--line);border-left-width:4px;border-radius:11px;padding:12px 14px;margin:10px 0;
+        background:#0d1530;position:relative;transition:.15s}
+  .flag.dismissed{opacity:.4;filter:grayscale(.6)}
+  .flag.dismissed .ttl{text-decoration:line-through}
+  .flag.crit{border-left-color:var(--crit)}
+  .flag.warn{border-left-color:var(--warn)}
+  .flag.adv{border-left-color:var(--adv)}
+  .flag .row{display:flex;align-items:center;gap:8px}
+  .sev{font-size:10.5px;font-weight:700;letter-spacing:.7px;padding:2px 7px;border-radius:6px;text-transform:uppercase}
+  .sev.crit{background:#3a0f12;color:#ff6b6b} .sev.warn{background:#3a2a0a;color:#ffc352} .sev.adv{background:#1b2436;color:#aebcd6}
+  .cat{font-size:11px;color:var(--mut)}
+  .ttl{font-weight:600;margin-left:2px}
+  .src{margin-left:auto;font-size:10px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .src.det{color:#7ee0a6;border-color:#1d5b3a}
+  .det-detail{color:var(--mut);margin:7px 0 0;font-size:12.5px}
+  .exp{color:#cfe0ff;margin:6px 0 0;font-size:12px}
+  .exp b{color:var(--mut);font-weight:600}
+  .evi{margin-top:7px;background:#0a0f24;border:1px dashed var(--line);border-radius:7px;padding:7px 9px;
+       font:11.5px/1.4 ui-monospace,Menlo,monospace;color:#d6def2;white-space:pre-wrap;word-break:break-word}
+  .x{position:absolute;top:10px;right:10px;background:#16203c;border:1px solid var(--line);color:var(--mut);
+     width:24px;height:24px;border-radius:7px;cursor:pointer;font-size:13px;line-height:1}
+  .x:hover{color:#fff;border-color:var(--acc)}
+  .dismissnote{font-size:12px;color:var(--mut);margin-top:6px}
+  .spin{display:inline-block;width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--acc);
+        border-radius:50%;animation:s .8s linear infinite;vertical-align:-3px;margin-right:7px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .foot{color:var(--mut);font-size:11.5px;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>The&nbsp;<b>Enforcer</b></h1>
+  <span class="tag">It knows how you work — and tells you when something isn't <i>you</i>.</span>
+  <span class="badge">● read-only · no action surface</span>
+</header>
+
+<main>
+  <!-- PROFILE -->
+  <section class="card" id="profile">
+    <h2>How Sarah works (the baseline)</h2>
+    <div id="profileBody" class="kv"><span class="tag">loading profile…</span></div>
+  </section>
+
+  <!-- INPUT -->
+  <section class="card">
+    <h2>Deliverable to check</h2>
+    <div class="fx" id="fixtures">
+      <button data-fx="clean">✅ Clean email<small>should pass with zero flags</small></button>
+      <button data-fx="convention_miss">📄 Financial report<small>missing CIMS ref + footer</small></button>
+      <button data-fx="sensitive_leak">🔒 Client email<small>account # + sent to gmail</small></button>
+      <button data-fx="injection">🛡️ Strategy memo<small>hidden prompt-injection</small></button>
+      <button data-fx="manipulation_deviation">⚠️ Internal email<small>urgent wire to new account</small></button>
+    </div>
+    <div class="sep"></div>
+    <label>Public Google Doc URL</label>
+    <input id="docUrl" type="text" placeholder="https://docs.google.com/document/d/…/edit" />
+    <label style="margin-top:10px;display:block">…or paste raw text</label>
+    <textarea id="rawText" placeholder="To: lauren@acmeclient.com&#10;&#10;Hi Lauren, …"></textarea>
+    <button class="run" id="runBtn">Run the Enforcer</button>
+  </section>
+
+  <!-- REPORT -->
+  <section class="card">
+    <h2>Enforcer report</h2>
+    <div id="status"></div>
+    <div class="injbar" id="injbar">
+      <span class="shield">🛡️</span>
+      <div><b>INJECTION QUARANTINED</b><small id="injfind">instruction-like content detected and withheld from every AI agent — reported, never executed.</small></div>
+    </div>
+    <div id="report"></div>
+    <div class="foot">Each flag is yours to dismiss — the Enforcer augments, it never acts.</div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+
+// ---- profile panel ----
+fetch('/api/profile').then(r=>r.json()).then(p=>{
+  const email=p.email||{}, docs=p.documents||{}, beh=p.behavior||{};
+  const fin=(docs.report_types||{}).financial_report||{};
+  const g = (email.greeting_style||{}).client||[];
+  const el = $('#profileBody');
+  el.innerHTML = `
+    <div class="kv"><div class="k">Persona</div><div class="v">${p.persona.name} — ${p.persona.role}, ${p.persona.firm}</div></div>
+    <div class="kv"><div class="k">Client greeting</div><div class="v">${g.map(x=>`<span class="pill">${x}</span>`).join('')}</div></div>
+    <div class="kv"><div class="k">Always signs with</div><pre class="sig">${(email.required_signature_block||'').replace(/</g,'&lt;')}</pre></div>
+    <div class="kv"><div class="k">Financial report must contain</div><div class="v">${(fin.required_sections||[]).map(x=>`<span class="pill">${x}</span>`).join('')}</div></div>
+    <div class="kv"><div class="k">Client data never goes to</div><div class="v">${(email.forbidden_recipient_domains||[]).slice(0,4).map(x=>`<span class="pill">${x}</span>`).join('')}</div></div>
+    <div class="kv"><div class="k">She never asks for</div><div class="v">${(beh.never_requests||[]).map(x=>`<span class="pill">${x.split(',')[0]}</span>`).join('')}</div></div>`;
+});
+
+// ---- run ----
+const SEV={critical:'crit',warning:'warn',advisory:'adv'};
+function run(payload){
+  $('#runBtn').disabled=true;
+  $('#status').innerHTML='<span class="spin"></span>Analyzing against Sarah\'s profile…';
+  $('#report').innerHTML=''; $('#injbar').classList.remove('on');
+  fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json()).then(render)
+    .catch(e=>{$('#status').textContent='Error: '+e;})
+    .finally(()=>{$('#runBtn').disabled=false;});
+}
+function render(res){
+  if(!res.ok){ $('#status').innerHTML='<span style="color:var(--crit)">Run failed:</span> '+(res.error||'unknown'); return; }
+  const r=res.report||{};
+  $('#status').textContent='';
+  // injection indicator
+  if(r.injection_detected){
+    $('#injbar').classList.add('on');
+    const f=(r.sanitization&&r.sanitization.findings)||[];
+    if(f.length) $('#injfind').textContent='Detected & withheld from every AI agent — never executed. Patterns: '+f.join(', ')+'.';
+  }
+  const rep=$('#report');
+  if(r.clean){
+    rep.innerHTML=`<div class="greenwrap"><div class="dot">✓</div><div><b>This looks like Sarah's work.</b><div class="tag">${r.summary||'No deviations from profile detected.'}</div></div></div>`;
+    return;
+  }
+  let html=`<div class="summary">${r.summary||''}</div>`;
+  let n=0;
+  (r.flags||[]).forEach((f,i)=>{
+    const sv=SEV[f.severity]||'adv';
+    const det = f.source==='deterministic';
+    html+=`<div class="flag ${sv}" id="flag${i}">
+      <button class="x" title="Dismiss" onclick="dismiss(${i})">✕</button>
+      <div class="row">
+        <span class="sev ${sv}">${f.severity}</span>
+        <span class="cat">${(f.category||'').replace(/_/g,' ')}</span>
+        <span class="ttl">${esc(f.title)}</span>
+        <span class="src ${det?'det':''}">${det?'deterministic':'AI agent'}</span>
+      </div>
+      ${f.detail?`<div class="det-detail">${esc(f.detail)}</div>`:''}
+      ${f.profile_expectation?`<div class="exp"><b>Profile rule:</b> ${esc(f.profile_expectation)}</div>`:''}
+      ${f.evidence?`<div class="evi">${esc(f.evidence)}</div>`:''}
+    </div>`; n++;
+  });
+  html+=`<div class="dismissnote" id="dnote"></div>`;
+  rep.innerHTML=html;
+  rep.dataset.total=n; rep.dataset.dismissed=0;
+}
+function dismiss(i){
+  const el=$('#flag'+i); if(!el||el.classList.contains('dismissed'))return;
+  el.classList.add('dismissed');
+  const rep=$('#report'); rep.dataset.dismissed=(+rep.dataset.dismissed)+1;
+  $('#dnote').textContent=`${rep.dataset.dismissed} of ${rep.dataset.total} flag(s) dismissed by you — the human stays in control.`;
+}
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// wire inputs
+document.querySelectorAll('#fixtures button').forEach(b=>{
+  b.onclick=()=>{ $('#docUrl').value=''; $('#rawText').value=''; run({fixture_id:b.dataset.fx}); };
+});
+$('#runBtn').onclick=()=>{
+  const url=$('#docUrl').value.trim(), raw=$('#rawText').value.trim();
+  if(url) run({doc_url:url}); else if(raw) run({raw_text:raw});
+  else run({fixture_id:'clean'});
+};
+</script>
+</body>
+</html>

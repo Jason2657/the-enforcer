@@ -84,6 +84,21 @@ severity, title, detail, profile_expectation, evidence, source).
 
 ---
 
+## Demo UI (3-panel web app)
+
+A dependency-free demo UI lives in [`ui/`](ui/). It serves the PRD's three panels — **Profile**
+("How Sarah works"), **Input** (fixture buttons / Google Doc URL / paste), and **Report**
+(severity-ranked flags, an **INJECTION QUARANTINED** indicator, and a live **dismiss ✕** on
+every flag) — and proxies runs to the deployed workflow via the GraphN CLI (no API keys in the
+browser, no CORS).
+
+```bash
+python3 ui/server.py     # → http://127.0.0.1:8787   (Python 3, stdlib only)
+```
+
+The dismiss interaction is the augmentation proof point: the human reviews flags and waves off
+any they disagree with — the Enforcer surfaces, never acts.
+
 ## The 5 demo fixtures (verified results)
 
 | fixture_id | kind | result |
