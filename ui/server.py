@@ -58,6 +58,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif self.path == "/api/profile":
             with open(os.path.join(ROOT, "profile.json"), "rb") as f:
                 self._send(200, f.read())
+        elif self.path.startswith("/api/deliverable"):
+            from urllib.parse import urlparse, parse_qs
+            fx = (parse_qs(urlparse(self.path).query).get("fixture_id", [""])[0])
+            try:
+                with open(os.path.join(HERE, "fixtures.json")) as f:
+                    fixtures = json.load(f)
+            except Exception:
+                fixtures = {}
+            d = fixtures.get(fx)
+            if d:
+                self._send(200, json.dumps({"kind": d.get("kind"), "raw_text": d.get("raw_text", "")}))
+            else:
+                self._send(404, json.dumps({"error": f"unknown fixture '{fx}'"}))
         else:
             self._send(404, json.dumps({"error": "not found"}))
 

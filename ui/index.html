@@ -19,7 +19,7 @@
   .tag{color:var(--mut);font-size:13px}
   .badge{margin-left:auto;font-size:12px;color:var(--ok);border:1px solid #1d5b3a;
          background:#0c2a1c;padding:5px 10px;border-radius:999px}
-  main{display:grid;grid-template-columns:300px 320px 1fr;gap:16px;padding:16px 22px;align-items:start}
+  main{display:grid;grid-template-columns:290px 400px 1fr;gap:16px;padding:16px 22px;align-items:start}
   .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
         border-radius:14px;padding:16px}
   .card h2{margin:0 0 10px;font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--mut)}
@@ -83,6 +83,14 @@
         border-radius:50%;animation:s .8s linear infinite;vertical-align:-3px;margin-right:7px}
   @keyframes s{to{transform:rotate(360deg)}}
   .foot{color:var(--mut);font-size:11.5px;margin-top:14px}
+  /* original deliverable preview */
+  #previewWrap{display:none;margin-top:14px}
+  #previewWrap.on{display:block}
+  .pvhead{display:flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin-bottom:6px}
+  .pvkind{background:#0c1430;border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:#cdd9f5;font-size:11px;text-transform:none;letter-spacing:0}
+  #preview{background:#0a0f24;border:1px solid var(--line);border-radius:9px;padding:11px 12px;
+           font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#d9e2f7;white-space:pre-wrap;
+           word-break:break-word;max-height:420px;overflow:auto}
 </style>
 </head>
 <body>
@@ -115,6 +123,10 @@
     <label style="margin-top:10px;display:block">…or paste raw text</label>
     <textarea id="rawText" placeholder="To: lauren@acmeclient.com&#10;&#10;Hi Lauren, …"></textarea>
     <button class="run" id="runBtn">Run the Enforcer</button>
+    <div id="previewWrap">
+      <div class="pvhead">📄 Original deliverable <span class="pvkind" id="pvkind"></span></div>
+      <div id="preview"></div>
+    </div>
   </section>
 
   <!-- REPORT -->
@@ -204,13 +216,25 @@ function dismiss(i){
 }
 function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// wire inputs
+// ---- original-deliverable preview ----
+function showPreview(kind, text){
+  $('#pvkind').textContent = kind || '';
+  $('#preview').textContent = text || '';
+  $('#previewWrap').classList.add('on');
+}
+// wire fixture buttons: show the ORIGINAL document, then analyze it
 document.querySelectorAll('#fixtures button').forEach(b=>{
-  b.onclick=()=>{ $('#docUrl').value=''; $('#rawText').value=''; run({fixture_id:b.dataset.fx}); };
+  b.onclick=()=>{
+    $('#docUrl').value=''; $('#rawText').value='';
+    fetch('/api/deliverable?fixture_id='+encodeURIComponent(b.dataset.fx))
+      .then(r=>r.json()).then(d=>showPreview(d.kind, d.raw_text)).catch(()=>{});
+    run({fixture_id:b.dataset.fx});   // runs while the judge reads the document
+  };
 });
 $('#runBtn').onclick=()=>{
   const url=$('#docUrl').value.trim(), raw=$('#rawText').value.trim();
-  if(url) run({doc_url:url}); else if(raw) run({raw_text:raw});
+  if(url){ showPreview('document', 'Fetching from public Google Doc:\n'+url); run({doc_url:url}); }
+  else if(raw){ showPreview(raw.toLowerCase().startsWith('to:')?'email':'document', raw); run({raw_text:raw}); }
   else run({fixture_id:'clean'});
 };
 </script>
