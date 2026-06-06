@@ -10,7 +10,7 @@
 **The Sentience Company** sponsor challenge · built on **GraphN** · team **The Sentience Company**
 
 ![The Enforcer — 3-panel demo UI](docs/enforcer-ui.png)
-<sub>↑ add your screenshot at `docs/enforcer-ui.png` (drag-drop in the GitHub UI) — see "Demo UI".</sub>
+<sub>Profile baseline (left) · the deliverable being checked + its original text (center) · the Enforcer's flagged report (right).</sub>
 
 ---
 
@@ -121,8 +121,7 @@ Input modes: a built-in **fixture**, a **public Google Doc URL** (read-only expo
 A dependency-free 3-panel web app in [`ui/`](ui/): **Profile** ("How Sarah works") · **Input**
 (original-deliverable preview) · **Report** (severity-ranked flags, an **INJECTION QUARANTINED**
 indicator, and a live **dismiss ✕**). It proxies runs to the deployed workflow through the GraphN
-CLI — no API keys in the browser, no CORS. *(To add the hero screenshot above: save it to
-`docs/enforcer-ui.png` and commit, or drag-drop it into the file on GitHub.)*
+CLI — no API keys in the browser, no CORS.
 
 ## Built on GraphN
 
