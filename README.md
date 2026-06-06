@@ -1,6 +1,6 @@
 # The Enforcer — GraphN build
 
-**Team:** The Sentience Company · **Platform:** GraphN · **Workspace:** `ws_e838e0e0ed08`
+**Sponsorship Challenge:** The Sentience Company · **Platform:** GraphN · **Workspace:** `ws_e838e0e0ed08`
 
 A read-only deliverable checker. It compares an email or document against a fixed user
 profile ("Sarah Chen, Senior Consultant") and flags deviations across four categories —
