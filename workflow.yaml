@@ -1,0 +1,127 @@
+document:
+  dsl: "1.0.0"
+  name: "The Enforcer"
+  version: "0.1.0"
+
+agents:
+  Intake_Agent: "res://agents/agent_5c25a4051136"
+  Convention_Agent: "res://agents/agent_b1bee41515dc"
+  Sensitive_Data_Agent: "res://agents/agent_e35b587538c4"
+  OOC_Agent: "res://agents/agent_d8b947678fae"
+
+functions:
+  fetch_deliverable: "res://functions/func_3983703c1b8d"
+  security_scan: "res://functions/func_e04e2d83c7c9"
+  merge_report: "res://functions/func_bb250d5bb91e"
+
+chat_hints: |
+  I am The Enforcer. I check a deliverable (email or document) against Sarah Chen's
+  profile and flag deviations — missing conventions, leaked sensitive data,
+  out-of-character tone, and prompt-injection / manipulation. I never send or edit anything.
+  My security scan quarantines any injection or manipulation BEFORE it reaches a language model.
+  Give me a fixture id (clean | convention_miss | sensitive_leak | injection |
+  manipulation_deviation), a PUBLIC Google Doc URL, or paste raw text.
+
+input:
+  fixture_id:
+    type: string
+    required: false
+    description: "One of: clean | convention_miss | sensitive_leak | injection | manipulation_deviation"
+    default: ""
+  doc_url:
+    type: string
+    required: false
+    description: "A PUBLIC Google Doc URL (exported to plain text)"
+    default: ""
+  raw_text:
+    type: string
+    required: false
+    description: "Pasted-in raw deliverable text"
+    default: ""
+
+steps:
+  # 1. FETCH — deterministic 3-mode resolver (read-only; no send/edit capability exists)
+  fetch:
+    call: function
+    function: fetch_deliverable
+    input:
+      fixture_id: '${input.fixture_id | default ""}'
+      doc_url: '${input.doc_url | default ""}'
+      raw_text: '${input.raw_text | default ""}'
+    output: deliverable
+
+  # 2. SECURITY SCAN — deterministic manipulation/injection detection + QUARANTINE.
+  #    Produces the manipulation flags + sanitization result, and a defanged_text in
+  #    which every malicious span is replaced before any LLM ever sees it.
+  security_scan:
+    call: function
+    function: security_scan
+    after: [fetch]
+    input:
+      raw_text: "${steps.fetch.output.raw_text}"
+    output: security
+
+  # 3. INTAKE — structure the (defanged, safe) deliverable
+  intake:
+    call: agent
+    agent: Intake_Agent
+    after: [security_scan]
+    input_template: |
+      Structure this deliverable (return ONLY JSON):
+      ---
+      ${steps.security_scan.output.defanged_text}
+    output: structure
+
+  # ===== PARALLEL LLM ANALYSIS BRANCHES (operate ONLY on defanged text) =====
+  convention:
+    call: agent
+    agent: Convention_Agent
+    after: [intake]
+    input_template: |
+      STRUCTURE:
+      ${steps.intake.output}
+      ---
+      DELIVERABLE:
+      ${steps.security_scan.output.defanged_text}
+    output: convention_flags
+
+  sensitive:
+    call: agent
+    agent: Sensitive_Data_Agent
+    after: [intake]
+    input_template: |
+      STRUCTURE:
+      ${steps.intake.output}
+      ---
+      DELIVERABLE:
+      ${steps.security_scan.output.defanged_text}
+    output: sensitive_flags
+
+  ooc:
+    call: agent
+    agent: OOC_Agent
+    after: [intake]
+    input_template: |
+      STRUCTURE:
+      ${steps.intake.output}
+      ---
+      DELIVERABLE:
+      ${steps.security_scan.output.defanged_text}
+    output: ooc_flags
+
+  # ===== MERGE — the only deterministic analysis-path code =====
+  merge:
+    call: function
+    function: merge_report
+    after: [convention, sensitive, ooc, security_scan]
+    input:
+      persona_name: "Sarah Chen"
+      deliverable_kind: "${steps.fetch.output.kind}"
+      convention: "${steps.convention.output}"
+      sensitive: "${steps.sensitive.output}"
+      ooc: "${steps.ooc.output}"
+      security: "${steps.security_scan.output}"
+    output: report
+
+output:
+  result: "${steps.merge.output}"

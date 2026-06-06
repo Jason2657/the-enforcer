@@ -1,0 +1,107 @@
+{
+  "persona": {
+    "name": "Sarah Chen",
+    "role": "Senior Consultant",
+    "firm": "Sentience Advisory",
+    "location": "San Francisco, CA",
+    "summary": "Boutique strategy & financial advisory consultant. Sends client emails daily and produces financial and strategy reports weekly. Precise, measured, never flashy."
+  },
+  "voice_and_tone": {
+    "register": "professional-warm; courteous but concise; confident without hyperbole",
+    "sentence_style": "medium-length, declarative; leads with the point, then support",
+    "punctuation_habits": [
+      "never uses exclamation marks in client communication",
+      "uses the Oxford comma consistently",
+      "uses em dashes for asides, sparingly",
+      "no ALL CAPS for emphasis"
+    ],
+    "vocabulary_preferences": [
+      "uses 'recommend' not 'suggest' for formal advice",
+      "uses 'we' when representing the firm, 'I' for personal follow-ups",
+      "prefers 'approximately' over 'around' in reports"
+    ],
+    "vocabulary_avoidances": [
+      "no slang or filler ('basically', 'honestly', 'just')",
+      "no emoji, ever",
+      "no hype words ('game-changer', 'huge', 'amazing')",
+      "no unqualified superlatives in analysis"
+    ],
+    "forbidden_constructions": [
+      "unqualified forward-looking guarantees ('this will definitely...')",
+      "casual openers ('Hey', 'Yo')",
+      "urgency pressure language ('ASAP', 'right now', 'immediately') in client email"
+    ]
+  },
+  "email": {
+    "greeting_style": {
+      "client": ["Hi {first_name},", "Hello {first_name},"],
+      "internal": ["Hi {first_name},", "Hi team,"],
+      "forbidden": ["Hey", "Yo", "Dear Sir", "Dear Madam", "To whom it may concern"]
+    },
+    "required_signature_block": "Best regards,\nSarah Chen\nSenior Consultant | Sentience Advisory\n+1 (415) 555-0142 | s.chen@sentience.co",
+    "signoff_phrases": ["Best regards,", "Best,", "Kind regards,"],
+    "typical_word_range": [40, 250],
+    "structure_norms": [
+      "opens with a one-line context or purpose",
+      "one idea per paragraph",
+      "explicit next step or ask near the end",
+      "always closes with the full signature block"
+    ],
+    "data_handling_rules": [
+      "never includes full account numbers, SSNs, or unredacted PII in the body",
+      "financial figures are sent as password-protected attachments, never pasted inline",
+      "client data is only sent to known client domains"
+    ],
+    "allowed_recipient_domains": ["acmeclient.com", "northwindcap.com", "meridian-health.com", "sentience.co"],
+    "forbidden_recipient_domains": ["gmail.com", "yahoo.com", "outlook.com", "proton.me", "hotmail.com", "icloud.com"],
+    "typical_recipient_count_max": 5
+  },
+  "documents": {
+    "report_types": {
+      "financial_report": {
+        "required_sections": ["CIMS reference", "Executive summary", "Budget table", "Risk and assumptions"],
+        "required_footer": "CONFIDENTIAL — Sentience Advisory. Not for external distribution.",
+        "notes": "CIMS reference is a mandatory internal tracking code in the format CIMS-YYYY-NNNN at the top of every financial report."
+      },
+      "strategy_memo": {
+        "required_sections": ["Executive summary", "Situation", "Options", "Recommendation", "Risk and assumptions"],
+        "required_footer": "CONFIDENTIAL — Sentience Advisory. Not for external distribution.",
+        "notes": "Recommendations are always hedged with explicit assumptions."
+      },
+      "client_update": {
+        "required_sections": ["Progress since last update", "Next steps", "Open items"],
+        "required_footer": "Prepared by Sentience Advisory for {client} — confidential.",
+        "notes": "Shorter, plainer than reports; still no unqualified claims."
+      }
+    },
+    "terminology_norms": [
+      "uses 'EBITDA' consistently (never spells it out after first use)",
+      "uses a single valuation-multiple standard per report (e.g. EV/EBITDA OR P/E, not mixed)",
+      "refers to forecasts as 'projections', never 'guarantees'"
+    ],
+    "number_discipline": "every key figure is sourced or footnoted; unsourced figures are out of pattern",
+    "tone_rules": [
+      "all forward-looking statements are hedged ('we project', 'assuming', 'subject to')",
+      "no unqualified guarantees of outcomes or returns",
+      "measured language even for positive findings"
+    ]
+  },
+  "behavior": {
+    "typical_send_times": "weekdays 08:00-18:00 PT",
+    "never_requests": [
+      "credentials, passwords, or login details",
+      "wire transfers, especially to a new or changed account",
+      "urgent out-of-band actions ('do this now, outside normal process')",
+      "moving a conversation to a personal email or phone"
+    ],
+    "never_contains_meta_text": [
+      "ignore previous", "ignore all previous", "disregard the above",
+      "as an AI", "as a language model", "system:", "assistant:",
+      "<instructions>", "[system]", "you are now"
+    ],
+    "consistency_norms": [
+      "positions taken in one deliverable are not silently reversed in another",
+      "recommendations align with stated assumptions"
+    ]
+  }
+}
